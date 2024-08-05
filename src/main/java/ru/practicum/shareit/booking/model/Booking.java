@@ -1,12 +1,13 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking.model;
 
-import ru.practicum.shareit.booking.model.BookingStatus;
+import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-public class BookingDto {
+@Data
+public class Booking {
     int id;
     LocalDateTime start;
     LocalDateTime end;
