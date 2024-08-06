@@ -1,8 +1,7 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -10,17 +9,14 @@ import ru.practicum.shareit.common.EntityAction;
 
 @Data
 @Builder
-public class ItemDto {
+public class UserDto {
     private Long id;
 
     @NotBlank(groups = {EntityAction.OnCreate.class})
     @Size(min = 3, groups = {EntityAction.OnCreate.class, EntityAction.OnUpdate.class})
     private String name;
 
+    @Email
     @NotBlank(groups = {EntityAction.OnCreate.class})
-    private String description;
-
-    @JsonProperty("available")
-    @NotNull(groups = {EntityAction.OnCreate.class})
-    private Boolean isAvailable;
+    private String email;
 }
