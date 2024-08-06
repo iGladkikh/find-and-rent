@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.common.exception.DataNotFoundException;
 import ru.practicum.shareit.common.LoggerMessagePattern;
+import ru.practicum.shareit.common.exception.ForbiddenException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -61,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
     public Item create(Item item) {
         log.debug(LoggerMessagePattern.DEBUG, "createItem", item);
         try {
-            checkOwnerForExists(item.getOwnerId());
+            checkUserForExists(item.getOwnerId());
 
             return itemRepository.create(item);
         } catch (Exception e) {
@@ -75,11 +76,13 @@ public class ItemServiceImpl implements ItemService {
         log.debug(LoggerMessagePattern.DEBUG, "updateItem", item);
         try {
             Long id = item.getId();
-
             checkItemForExists(id);
-            checkOwnerForExists(item.getOwnerId());
+
+            Long userId = item.getOwnerId();
+            checkUserForExists(userId);
 
             Item oldItem = findById(id);
+            checkUserForEditPermissions(userId, oldItem);
 
             if (item.getName() != null) {
                 oldItem.setName(item.getName());
@@ -104,9 +107,15 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private void checkOwnerForExists(long id) {
+    private void checkUserForExists(long id) {
         if (userRepository.findById(id).isEmpty()) {
             throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(id));
+        }
+    }
+
+    private void checkUserForEditPermissions(long userId, Item item) {
+        if (userId != item.getOwnerId()) {
+            throw new ForbiddenException("Пользователь с id: %d не имеет прав на редактирование".formatted(userId));
         }
     }
 

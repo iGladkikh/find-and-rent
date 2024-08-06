@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.common.exception.DataNotFoundException;
 import ru.practicum.shareit.common.exception.DuplicatedDataException;
+import ru.practicum.shareit.common.exception.ForbiddenException;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -27,13 +28,19 @@ public class ErrorHandler {
 
     @ExceptionHandler({DataNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(DataNotFoundException e) {
+    public ErrorResponse handleNotFound(Exception e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler({DuplicatedDataException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleDuplicatedData(DuplicatedDataException e) {
+    public ErrorResponse handleDuplicatedData(Exception e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler({ForbiddenException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbidden(Exception e) {
         return new ErrorResponse(e.getMessage());
     }
 

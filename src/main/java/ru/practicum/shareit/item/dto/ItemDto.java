@@ -11,16 +11,16 @@ import ru.practicum.shareit.common.EntityAction;
 @Data
 @Builder
 public class ItemDto {
-    Long id;
+    private Long id;
 
     @NotBlank(groups = {EntityAction.OnCreate.class})
     @Size(min = 3, groups = {EntityAction.OnCreate.class, EntityAction.OnUpdate.class})
-    String name;
+    private String name;
 
     @NotBlank(groups = {EntityAction.OnCreate.class})
-    String description;
+    private String description;
 
     @JsonProperty("available")
     @NotNull(groups = {EntityAction.OnCreate.class})
-    Boolean isAvailable;
+    private Boolean isAvailable;
 }
