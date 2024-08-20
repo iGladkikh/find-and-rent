@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.common.BaseDto;
 import ru.practicum.shareit.common.EntityAction;
 
 @Data
-@Builder
+//@JsonView(EntityView.ItemDto.Short.class)
 public class ItemDto {
     private Long id;
 
@@ -23,4 +23,6 @@ public class ItemDto {
     @JsonProperty("available")
     @NotNull(groups = {EntityAction.OnCreate.class})
     private Boolean isAvailable;
+
+    private BaseDto owner;
 }
