@@ -13,21 +13,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingService;
-import ru.practicum.shareit.comment.Comment;
-import ru.practicum.shareit.comment.CommentDto;
-import ru.practicum.shareit.comment.CommentMapper;
-import ru.practicum.shareit.comment.CommentService;
 import ru.practicum.shareit.common.EntityAction;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentMapper;
+import ru.practicum.shareit.item.comment.CommentService;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Validated
 @RestController
@@ -35,43 +28,21 @@ import java.util.stream.Collectors;
 public class ItemController {
     private final ItemService itemService;
     private final CommentService commentService;
-    private final BookingService bookingService;
 
     @Autowired
-    public ItemController(ItemService itemService, CommentService commentService, BookingService bookingService) {
+    public ItemController(ItemService itemService, CommentService commentService) {
         this.itemService = itemService;
         this.commentService = commentService;
-        this.bookingService = bookingService;
     }
 
     @GetMapping
     public List<ItemDto> findByOwnerIdWithComments(@RequestHeader(name = "X-Sharer-User-Id") @Positive long ownerId) {
-        List<Item> items = itemService.findByOwnerId(ownerId);
-        List<Long> itemIds = items.stream().map(Item::getId).toList();
-
-        Map<Long, List<Comment>> commentMap = commentService.findByItemIds(itemIds)
-                .stream()
-                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
-
-        return items.stream()
-                .map(item -> (ItemDto) ItemMapper.toDto(item,
-                        CommentMapper.toDto(commentMap.getOrDefault(item.getId(), Collections.emptyList())))
-                )
-                .toList();
+        return itemService.findByOwnerIdWithComments(ownerId);
     }
 
     @GetMapping("/{id}")
-    public ItemDto findByIdWithCommentsAndBookingsDto(@PathVariable(name = "id") long itemId) {
-        Item item = itemService.findById(itemId);
-        List<Comment> comments = commentService.findByItemIds(List.of(itemId));
-        List<CommentDto> commentsDto = CommentMapper.toDto(comments);
-
-        Booking lastBooking = bookingService.findLastForItem(itemId);
-        Booking nextBooking = bookingService.findNextForItem(itemId);
-        BookingDto lastBookingDto = lastBooking != null ? BookingMapper.toDto(lastBooking) : null;
-        BookingDto nextBookingDto = nextBooking != null ? BookingMapper.toDto(nextBooking) : null;
-
-        return ItemMapper.toDto(item, commentsDto, lastBookingDto, nextBookingDto);
+    public ItemDto findByIdWithCommentsAndBookings(@PathVariable(name = "id") long itemId) {
+        return itemService.findByIdWithCommentsAndBookings(itemId);
     }
 
     @GetMapping("/search")

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.comment;
+package ru.practicum.shareit.item.comment;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

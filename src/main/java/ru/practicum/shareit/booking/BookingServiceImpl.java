@@ -12,6 +12,7 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserRole;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,22 +36,7 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> findByBookerIdUsingStateFilter(long bookerId, BookingStateFilter filter) {
         log.debug(LoggerMessagePattern.DEBUG, "findByBookerIdUsingStateFilter", bookerId);
         try {
-            if (userRepository.findById(bookerId).isEmpty()) {
-                throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(bookerId));
-            }
-
-            Instant now = Instant.now();
-            return switch (filter) {
-                case ALL -> bookingRepository.findByBooker_IdOrderByStartDesc(bookerId);
-                case CURRENT ->
-                        bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(bookerId, now, now);
-                case PAST -> bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(bookerId, now);
-                case FUTURE -> bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(bookerId, now);
-                case WAITING ->
-                        bookingRepository.findByBooker_IdAndStatusEqualsOrderByStartDesc(bookerId, BookingState.WAITING);
-                case REJECTED ->
-                        bookingRepository.findByBooker_IdAndStatusEqualsOrderByStartDesc(bookerId, BookingState.REJECTED);
-            };
+            return findByUserIdUsingStateFilter(bookerId, UserRole.BOOKER, filter);
         } catch (Exception e) {
             log.warn(LoggerMessagePattern.WARN, "findByBookerIdUsingStateFilter", bookerId, e.getMessage(), e.getClass());
             throw e;
@@ -61,27 +47,39 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> findByOwnerIdUsingStateFilter(long ownerId, BookingStateFilter filter) {
         log.debug(LoggerMessagePattern.DEBUG, "findByOwnerIdUsingStateFilter", ownerId);
         try {
-            if (userRepository.findById(ownerId).isEmpty()) {
-                throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(ownerId));
-            }
-
-            Instant now = Instant.now();
-
-            return switch (filter) {
-                case ALL -> bookingRepository.findByItem_Owner_IdOrderByStartDesc(ownerId);
-                case CURRENT ->
-                        bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(ownerId, now, now);
-                case PAST -> bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(ownerId, now);
-                case FUTURE -> bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(ownerId, now);
-                case WAITING ->
-                        bookingRepository.findByItem_Owner_IdAndStatusEqualsOrderByStartDesc(ownerId, BookingState.WAITING);
-                case REJECTED ->
-                        bookingRepository.findByItem_Owner_IdAndStatusEqualsOrderByStartDesc(ownerId, BookingState.REJECTED);
-            };
+            return findByUserIdUsingStateFilter(ownerId, UserRole.OWNER, filter);
         } catch (Exception e) {
             log.warn(LoggerMessagePattern.WARN, "findByOwnerIdUsingStateFilter", ownerId, e.getMessage(), e.getClass());
             throw e;
         }
+    }
+
+    private List<Booking> findByUserIdUsingStateFilter(long userId, UserRole userRole, BookingStateFilter filter) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(userId));
+        }
+
+        Instant now = Instant.now();
+        return switch (filter) {
+            case ALL -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdOrderByStartDesc(userId) :
+                    bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId);
+            case CURRENT -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, now, now) :
+                    bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId, now, now);
+            case PAST -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdAndEndIsBeforeOrderByStartDesc(userId, now) :
+                    bookingRepository.findByItem_Owner_IdAndEndIsBeforeOrderByStartDesc(userId, now);
+            case FUTURE -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdAndStartIsAfterOrderByStartDesc(userId, now) :
+                    bookingRepository.findByItem_Owner_IdAndStartIsAfterOrderByStartDesc(userId, now);
+            case WAITING -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdAndStatusEqualsOrderByStartDesc(userId, BookingState.WAITING) :
+                    bookingRepository.findByItem_Owner_IdAndStatusEqualsOrderByStartDesc(userId, BookingState.WAITING);
+            case REJECTED -> userRole == UserRole.BOOKER ?
+                    bookingRepository.findByBooker_IdAndStatusEqualsOrderByStartDesc(userId, BookingState.REJECTED) :
+                    bookingRepository.findByItem_Owner_IdAndStatusEqualsOrderByStartDesc(userId, BookingState.REJECTED);
+        };
     }
 
     @Override
@@ -175,7 +173,7 @@ public class BookingServiceImpl implements BookingService {
 
             Booking booking = bookingOptional.get();
             if (booking.getItem().getOwner().getId() != ownerId) {
-                throw new ForbiddenException("Пользователь с id: %d не является вдалельцем вещи с id: %d"
+                throw new ForbiddenException("Пользователь с id: %d не является влалельцем вещи с id: %d"
                         .formatted(bookingId, booking.getItem().getId()));
             }
 

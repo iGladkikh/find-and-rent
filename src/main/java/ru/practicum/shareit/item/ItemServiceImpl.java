@@ -3,31 +3,40 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.comment.CommentRepository;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.common.LoggerMessagePattern;
 import ru.practicum.shareit.common.exception.DataNotFoundException;
 import ru.practicum.shareit.common.exception.ForbiddenException;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentDto;
+import ru.practicum.shareit.item.comment.CommentMapper;
+import ru.practicum.shareit.item.comment.CommentService;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.UserService;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final CommentRepository commentRepository;
-    private final BookingRepository bookingRepository;
+    private final UserService userService;
+    private final CommentService commentService;
+    private final BookingService bookingService;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, CommentRepository commentRepository, BookingRepository bookingRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserService userService, CommentService commentService, BookingService bookingService) {
         this.itemRepository = itemRepository;
-        this.userRepository = userRepository;
-        this.commentRepository = commentRepository;
-        this.bookingRepository = bookingRepository;
+        this.userService = userService;
+        this.commentService = commentService;
+        this.bookingService = bookingService;
     }
 
     @Override
@@ -65,15 +74,41 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<ItemDto> findByOwnerIdWithComments(long ownerId) {
+        List<Item> items = findByOwnerId(ownerId);
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
+
+        Map<Long, List<Comment>> itemIdToComments = commentService.findByItemIds(itemIds)
+                .stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
+        return items.stream()
+                .map(item -> (ItemDto) ItemMapper.toDto(item,
+                        CommentMapper.toDto(itemIdToComments.getOrDefault(item.getId(), Collections.emptyList())))
+                )
+                .toList();
+    }
+
+    @Override
+    public ItemDto findByIdWithCommentsAndBookings(long itemId) {
+        Item item = findById(itemId);
+        List<Comment> comments = commentService.findByItemIds(List.of(itemId));
+        List<CommentDto> commentsDto = CommentMapper.toDto(comments);
+
+        Booking lastBooking = bookingService.findLastForItem(itemId);
+        Booking nextBooking = bookingService.findNextForItem(itemId);
+        BookingDto lastBookingDto = lastBooking != null ? BookingMapper.toDto(lastBooking) : null;
+        BookingDto nextBookingDto = nextBooking != null ? BookingMapper.toDto(nextBooking) : null;
+
+        return ItemMapper.toDto(item, commentsDto, lastBookingDto, nextBookingDto);
+    }
+
+    @Override
     public Item create(long ownerId, Item item) {
         log.debug(LoggerMessagePattern.DEBUG, "createItem", item);
         try {
-            Optional<User> ownerOptional = userRepository.findById(ownerId);
-            if (ownerOptional.isEmpty()) {
-                throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(ownerId));
-            }
-
-            item.setOwner(ownerOptional.get());
+            User owner = userService.findById(ownerId);
+            item.setOwner(owner);
             return itemRepository.save(item);
         } catch (Exception e) {
             log.warn(LoggerMessagePattern.WARN, "createItem", item, e.getMessage(), e.getClass());
@@ -85,7 +120,7 @@ public class ItemServiceImpl implements ItemService {
     public Item update(long ownerId, Item item) {
         log.debug(LoggerMessagePattern.DEBUG, "updateItem", item);
         try {
-            checkUserForExists(ownerId);
+            userService.findById(ownerId);
 
             Long id = item.getId();
             Item oldItem = itemRepository.findById(id).orElseThrow(() ->
@@ -110,11 +145,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private void checkUserForExists(long id) {
-        if (userRepository.findById(id).isEmpty()) {
-            throw new DataNotFoundException("Пользователь с id: %d не найден".formatted(id));
-        }
-    }
 
     private void checkUserForEditPermissions(long userId, Item item) {
         if (userId != item.getOwner().getId()) {
