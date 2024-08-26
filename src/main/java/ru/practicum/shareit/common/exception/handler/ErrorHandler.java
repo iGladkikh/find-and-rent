@@ -9,6 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.common.exception.DataNotAvailableException;
 import ru.practicum.shareit.common.exception.DataNotFoundException;
 import ru.practicum.shareit.common.exception.DuplicatedDataException;
 import ru.practicum.shareit.common.exception.ForbiddenException;
@@ -20,7 +21,8 @@ public class ErrorHandler {
             ConstraintViolationException.class,
             ValidationException.class,
             MethodArgumentNotValidException.class,
-            MissingRequestHeaderException.class})
+            MissingRequestHeaderException.class,
+            DataNotAvailableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(Exception e) {
         return new ErrorResponse(e.getMessage());
