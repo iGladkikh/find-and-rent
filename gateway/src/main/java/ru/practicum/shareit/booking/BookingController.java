@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-@Controller
-@RequestMapping(path = "/bookings")
-@RequiredArgsConstructor
 @Slf4j
 @Validated
+@RequiredArgsConstructor
+@Controller
+@RequestMapping(path = "/bookings")
 public class BookingController {
     private final BookingClient bookingClient;
 

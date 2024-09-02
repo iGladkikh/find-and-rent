@@ -1,7 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,27 +29,27 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> findByBookerIdAndState(
-            @RequestHeader(name = "X-Sharer-User-Id") @Positive long bookerId,
+            @RequestHeader(name = "X-Sharer-User-Id") long bookerId,
             @RequestParam(name = "state", defaultValue = "ALL") BookingStateFilter state) {
         return BookingMapper.toDto(bookingService.findByBookerIdAndState(bookerId, state));
     }
 
     @GetMapping("/owner")
     public List<BookingDto> findByOwnerIdAndState(
-            @RequestHeader(name = "X-Sharer-User-Id") @Positive long ownerId,
+            @RequestHeader(name = "X-Sharer-User-Id") long ownerId,
             @RequestParam(name = "state", defaultValue = "ALL") BookingStateFilter state) {
         return BookingMapper.toDto(bookingService.findByOwnerIdAndState(ownerId, state));
     }
 
     @GetMapping("/{id}")
     public BookingDto findById(@PathVariable(name = "id") long bookingId,
-                               @RequestHeader(name = "X-Sharer-User-Id") @Positive long userId) {
+                               @RequestHeader(name = "X-Sharer-User-Id") long userId) {
         return BookingMapper.toDto(bookingService.findByIdAndUserId(bookingId, userId));
     }
 
     @PostMapping
-    public BookingDto create(@RequestHeader(name = "X-Sharer-User-Id") @Positive long bookerId,
-                             @RequestBody @Valid BookingRequestDto bookingDto) {
+    public BookingDto create(@RequestHeader(name = "X-Sharer-User-Id") long bookerId,
+                             @RequestBody BookingRequestDto bookingDto) {
         Booking booking = bookingService.create(
                 bookerId,
                 bookingDto.getItemId(),
@@ -63,7 +61,7 @@ public class BookingController {
 
     @PatchMapping("/{id}")
     public BookingDto approve(@PathVariable(name = "id") long bookingId,
-                              @RequestHeader(name = "X-Sharer-User-Id") @Positive long ownerId,
+                              @RequestHeader(name = "X-Sharer-User-Id") long ownerId,
                               @RequestParam(name = "approved") Boolean isApproved) {
         return BookingMapper.toDto(bookingService.approve(bookingId, ownerId, isApproved));
     }

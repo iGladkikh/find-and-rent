@@ -1,9 +1,6 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +12,6 @@ import ru.practicum.shareit.request.dto.RequestDto;
 
 import java.util.List;
 
-@Validated
 @RestController
 @RequestMapping("/requests")
 public class RequestController {
@@ -27,7 +23,7 @@ public class RequestController {
     }
 
     @GetMapping
-    public List<RequestDto> findByRequestorId(@RequestHeader(name = "X-Sharer-User-Id") @Positive long requestorId) {
+    public List<RequestDto> findByRequestorId(@RequestHeader(name = "X-Sharer-User-Id") long requestorId) {
         return RequestMapper.toDto(requestService.findByRequestorId(requestorId));
     }
 
@@ -42,8 +38,8 @@ public class RequestController {
     }
 
     @PostMapping
-    public RequestDto create(@RequestHeader(name = "X-Sharer-User-Id") @Positive long requestorId,
-                             @RequestBody @Valid RequestDto requestDto) {
+    public RequestDto create(@RequestHeader(name = "X-Sharer-User-Id") long requestorId,
+                             @RequestBody RequestDto requestDto) {
         Request request = RequestMapper.toModel(requestDto);
         return RequestMapper.toDto(requestService.create(requestorId, request));
     }

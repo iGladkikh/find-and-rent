@@ -1,8 +1,6 @@
 package ru.practicum.shareit.user;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,11 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.common.EntityAction;
 
 import java.util.List;
 
-@Validated
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
@@ -37,15 +33,13 @@ public class UserController {
     }
 
     @PostMapping
-    @Validated(EntityAction.OnCreate.class)
-    public UserDto create(@RequestBody @Valid UserDto userDto) {
+    public UserDto create(@RequestBody UserDto userDto) {
         User user = UserMapper.toModel(userDto);
         return UserMapper.toDto(userService.create(user));
     }
 
     @PatchMapping("/{id}")
-    @Validated(EntityAction.OnUpdate.class)
-    public UserDto update(@PathVariable long id, @RequestBody @Valid UserDto userDto) {
+    public UserDto update(@PathVariable long id, @RequestBody UserDto userDto) {
         userDto.setId(id);
         User user = UserMapper.toModel(userDto);
         return UserMapper.toDto(userService.update(user));

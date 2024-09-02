@@ -35,7 +35,7 @@ public class RequestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> findById(@PathVariable(name = "id") long requestId) {
+    public ResponseEntity<Object> findById(@PathVariable(name = "id") @Positive long requestId) {
         log.info("Get request with id={}", requestId);
         return requestClient.findById(requestId);
     }
