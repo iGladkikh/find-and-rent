@@ -11,7 +11,7 @@ import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestWithItemsDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -48,37 +48,37 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<Request> findByRequestorId(long requestorId) {
-        log.debug(LoggerMessagePattern.DEBUG, "findItemsByRequestorId", requestorId);
+        log.debug(LoggerMessagePattern.DEBUG, "findRequestsByRequestorId", requestorId);
         try {
             return requestRepository.findByRequestor_IdOrderByCreatedAtDesc(requestorId);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findItemsByRequestorId", requestorId, e.getMessage(), e.getClass());
+            log.warn(LoggerMessagePattern.WARN, "findRequestsByRequestorId", requestorId, e.getMessage(), e.getClass());
             throw e;
         }
     }
 
     @Override
     public Request findById(long id) {
-        log.debug(LoggerMessagePattern.DEBUG, "findById", id);
+        log.debug(LoggerMessagePattern.DEBUG, "findRequestById", id);
         try {
             return requestRepository.findById(id).orElseThrow(() ->
                     new DataNotFoundException("Запрос с id: %d не найден".formatted(id)));
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findById", id, e.getMessage(), e.getClass());
+            log.warn(LoggerMessagePattern.WARN, "findRequestById", id, e.getMessage(), e.getClass());
             throw e;
         }
     }
 
     @Override
-    public RequestDto findByIdWithItems(long requestId) {
-        log.debug(LoggerMessagePattern.DEBUG, "findByIdWithItems", requestId);
+    public RequestWithItemsDto findByIdWithItems(long requestId) {
+        log.debug(LoggerMessagePattern.DEBUG, "findRequestByIdWithItems", requestId);
         try {
             Request request = findById(requestId);
             List<Item> items = itemService.findByRequestId(requestId);
             List<ItemDto> itemDtos = ItemMapper.toDto(items);
             return RequestMapper.toDto(request, itemDtos);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findByIdWithItems", requestId, e.getMessage(), e.getClass());
+            log.warn(LoggerMessagePattern.WARN, "findRequestByIdWithItems", requestId, e.getMessage(), e.getClass());
             throw e;
         }
     }

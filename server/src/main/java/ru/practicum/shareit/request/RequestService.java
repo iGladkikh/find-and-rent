@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import ru.practicum.shareit.request.dto.RequestDto;
+import ru.practicum.shareit.request.dto.RequestWithItemsDto;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public interface RequestService {
 
     Request findById(long id);
 
-    RequestDto findByIdWithItems(long id);
+    RequestWithItemsDto findByIdWithItems(long id);
 
     Request create(long requestorId, Request request);
 }

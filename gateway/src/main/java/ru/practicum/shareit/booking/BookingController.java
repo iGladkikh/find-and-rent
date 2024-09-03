@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,19 +26,17 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<Object> findByBookerIdAndState(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                         @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                         @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                         @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                         @RequestParam(name = "state", defaultValue = "all") String stateParam) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
-        log.info("Get booking with userId={}, state={}, from={}, size={}", userId, stateParam, from, size);
-        return bookingClient.getBookings(userId, state, from, size);
+        log.info("Get booking with userId={}, state={}, from={}, size={}", userId, stateParam);
+        return bookingClient.getBookings(userId, state);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> findByOwnerIdAndState(@RequestHeader(name = "X-Sharer-User-Id") @Positive long ownerId,
                                                         @RequestParam(name = "state", defaultValue = "all") String stateParam) {
-       BookingState state = BookingState.from(stateParam)
+        BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
         log.info("Get booking with ownerId={}, state={}", ownerId, stateParam);
         return bookingClient.findByOwnerIdAndState(ownerId, state);

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingCreateDto;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -42,14 +42,14 @@ public class BookingController {
     }
 
     @GetMapping("/{id}")
-    public BookingDto findById(@PathVariable(name = "id") long bookingId,
+    public BookingDto findByIdAndUserId(@PathVariable(name = "id") long bookingId,
                                @RequestHeader(name = "X-Sharer-User-Id") long userId) {
         return BookingMapper.toDto(bookingService.findByIdAndUserId(bookingId, userId));
     }
 
     @PostMapping
     public BookingDto create(@RequestHeader(name = "X-Sharer-User-Id") long bookerId,
-                             @RequestBody BookingRequestDto bookingDto) {
+                             @RequestBody BookingCreateDto bookingDto) {
         Booking booking = bookingService.create(
                 bookerId,
                 bookingDto.getItemId(),
