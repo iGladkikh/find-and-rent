@@ -55,7 +55,7 @@ public class ItemServiceImpl implements ItemService {
         try {
             return itemRepository.findByOwner_Id(ownerId);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findItemsByOwnerId", ownerId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findItemsByOwnerId", ownerId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -66,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
         try {
             return itemRepository.findByRequest_Id(requestId);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findItemsByRequestId", requestId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findItemsByRequestId", requestId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -78,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
             return itemRepository.findById(id).orElseThrow(() ->
                     new DataNotFoundException("Вещь с id: %d не найдена".formatted(id)));
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findItemById", id, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findItemById", id, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -89,7 +89,7 @@ public class ItemServiceImpl implements ItemService {
         try {
             return itemRepository.findByText(query);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findItemByText", query, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findItemByText", query, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -137,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
             }
             return itemRepository.save(item);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "createItem", item, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "createItem", item, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -166,7 +166,7 @@ public class ItemServiceImpl implements ItemService {
 
             return itemRepository.save(oldItem);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "updateItem", item, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "updateItem", item, e.getMessage(), e.getClass());
             throw e;
         }
     }

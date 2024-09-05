@@ -41,7 +41,7 @@ public class RequestServiceImpl implements RequestService {
             Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
             return requestRepository.findAll(sort);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findAllRequests", null, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findAllRequests", null, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -52,7 +52,7 @@ public class RequestServiceImpl implements RequestService {
         try {
             return requestRepository.findByRequestor_IdOrderByCreatedAtDesc(requestorId);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findRequestsByRequestorId", requestorId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findRequestsByRequestorId", requestorId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -64,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
             return requestRepository.findById(id).orElseThrow(() ->
                     new DataNotFoundException("Запрос с id: %d не найден".formatted(id)));
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findRequestById", id, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findRequestById", id, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -78,7 +78,7 @@ public class RequestServiceImpl implements RequestService {
             List<ItemDto> itemDtos = ItemMapper.toDto(items);
             return RequestMapper.toDto(request, itemDtos);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findRequestByIdWithItems", requestId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findRequestByIdWithItems", requestId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -92,7 +92,7 @@ public class RequestServiceImpl implements RequestService {
             request.setCreatedAt(Instant.now());
             return requestRepository.save(request);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "createRequest", request, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "createRequest", request, e.getMessage(), e.getClass());
             throw e;
         }
     }

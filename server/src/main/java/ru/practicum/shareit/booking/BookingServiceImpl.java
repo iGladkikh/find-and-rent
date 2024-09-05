@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             return findByUserIdUsingStateFilter(bookerId, UserRole.BOOKER, filter);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findByBookerIdUsingStateFilter", bookerId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findByBookerIdUsingStateFilter", bookerId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -49,7 +49,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             return findByUserIdUsingStateFilter(ownerId, UserRole.OWNER, filter);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findByOwnerIdUsingStateFilter", ownerId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findByOwnerIdUsingStateFilter", ownerId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -99,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
 
             return booking;
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findBookingById", bookingId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findBookingById", bookingId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -111,7 +111,7 @@ public class BookingServiceImpl implements BookingService {
             Instant now = Instant.now();
             return bookingRepository.findFirstByItem_IdAndStartIsBeforeAndEndIsAfterOrderByEndDesc(itemId, now, now);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findLastBookingForItem", itemId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findLastBookingForItem", itemId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -122,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
         try {
             return bookingRepository.findFirstByItem_IdAndStartIsAfterOrderByStartAsc(itemId, Instant.now());
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findNextBookingForItem", itemId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findNextBookingForItem", itemId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus(BookingState.WAITING);
             return bookingRepository.save(booking);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "createBooking", bookerId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "createBooking", bookerId, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -185,7 +185,7 @@ public class BookingServiceImpl implements BookingService {
 
             return bookingRepository.save(booking);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "approveBooking", bookingId, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "approveBooking", bookingId, e.getMessage(), e.getClass());
             throw e;
         }
     }

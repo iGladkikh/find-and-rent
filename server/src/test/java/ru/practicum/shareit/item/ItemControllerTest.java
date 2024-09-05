@@ -21,6 +21,7 @@ import ru.practicum.shareit.user.User;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +29,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -91,6 +92,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$", is(notNullValue())))
                 .andExpect(jsonPath("$[0].comments", is(notNullValue())))
                 .andExpect(jsonPath("$[0].comments[0].id", is(comment.getId()), Long.class));
+
+        verify(itemService, times(1)).findByOwnerIdWithComments(1);
     }
 
     @Test
@@ -105,7 +108,7 @@ class ItemControllerTest {
         when(itemService.findByIdWithCommentsAndBookings(anyLong()))
                 .thenReturn(itemWithCommentsAndBookingsDto);
 
-        mvc.perform(get(URI_PATH + "/" + anyLong())
+        mvc.perform(get(URI_PATH + "/" + item.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -115,6 +118,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.comments[0].id", is(comment.getId()), Long.class))
                 .andExpect(jsonPath("$.lastBooking", is(anything())))
                 .andExpect(jsonPath("$.nextBooking.id", is(booking.getId()), Long.class));
+
+        verify(itemService, times(1)).findByIdWithCommentsAndBookings(1);
     }
 
     @Test
@@ -124,13 +129,15 @@ class ItemControllerTest {
 
         mvc.perform(get(URI_PATH + "/search")
                         .header("X-Sharer-User-Id", user.getId())
-                        .param("text", "text")
+                        .param("text", "Текст")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]", is(notNullValue())))
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class));
+
+        verify(itemService, times(1)).findByText("Текст");
     }
 
     @Test
@@ -152,6 +159,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.owner", is(notNullValue())))
                 .andExpect(jsonPath("$.owner.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.owner.name", is(user.getName())));
+
+        verify(itemService, times(1)).create(1, item, Optional.empty());
     }
 
     @Test
@@ -184,6 +193,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.name", is(itemDto.getName())))
                 .andExpect(jsonPath("$.description", is(itemDto.getDescription())))
                 .andExpect(jsonPath("$.available", is(itemDto.getAvailable())));
+
+        verify(itemService, times(1)).update(1, item);
     }
 
     private static Comment createTestComment() {

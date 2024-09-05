@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,6 +79,9 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$", is(notNullValue())))
                 .andExpect(jsonPath("$[0]", is(notNullValue())))
                 .andExpect(jsonPath("$[0].id", is(request.getId()), Long.class));
+
+        verify(requestService, times(1)).findAll();
+
     }
 
     @Test
@@ -95,6 +98,8 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$", is(notNullValue())))
                 .andExpect(jsonPath("$[0]", is(notNullValue())))
                 .andExpect(jsonPath("$[0].requestor.id", is(user.getId()), Long.class));
+
+        verify(requestService, times(1)).findByRequestorId(1);
     }
 
     @Test
@@ -110,7 +115,7 @@ class RequestControllerTest {
         when(requestService.findByIdWithItems(anyLong()))
                 .thenReturn(withItemsDto);
 
-        mvc.perform(get(URI_PATH + "/" + anyLong())
+        mvc.perform(get(URI_PATH + "/" + item.getId())
                         .header("X-Sharer-User-Id", user.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,15 +125,14 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.requestor", is(notNullValue())))
                 .andExpect(jsonPath("$.requestor.id", is(user.getId()), Long.class))
                 .andExpect(jsonPath("$.items", is(notNullValue())))
-                .andExpect(jsonPath("$.items[0].id", is(item.getId()), Long.class))
+                .andExpect(jsonPath("$.items[0].id", is(item.getId()), Long.class));
 
-
-        ;
+        verify(requestService, times(1)).findByIdWithItems(1);
     }
 
     @Test
     void create() throws Exception {
-        when(requestService.create(anyLong(), any()))
+        when(requestService.create(anyLong(), any(Request.class)))
                 .thenReturn(request);
 
         mvc.perform(post(URI_PATH)
@@ -145,5 +149,6 @@ class RequestControllerTest {
                 .andExpect(jsonPath("$.requestor.id", is(request.getRequestor().getId()), Long.class))
                 .andExpect(jsonPath("$.requestor.name", is(request.getRequestor().getName())));
 
+        verify(requestService, times(1)).create(1, RequestMapper.toModel(requestDto));
     }
 }

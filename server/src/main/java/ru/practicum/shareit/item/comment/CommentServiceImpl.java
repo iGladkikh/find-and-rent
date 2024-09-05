@@ -68,7 +68,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setCreatedAt(now);
             return commentRepository.save(comment);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "createComment", comment, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "createComment", comment, e.getMessage(), e.getClass());
             throw e;
         }
     }

@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userRepository.findAll();
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findAllUsers", null, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findAllUsers", null, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
             return userRepository.findById(id).orElseThrow(() ->
                     new DataNotFoundException("Пользователь с id: %d не найден".formatted(id)));
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "findUserById", id, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "findUserById", id, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
             checkEmailForExists(user);
             return userRepository.save(user);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "createUser", user, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "createUser", user, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
             checkEmailForExists(user);
             return userRepository.save(user);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "updateUser", user, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "updateUser", user, e.getMessage(), e.getClass());
             throw e;
         }
     }
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
             checkUserForExists(id);
             userRepository.deleteById(id);
         } catch (Exception e) {
-            log.warn(LoggerMessagePattern.WARN, "deleteUser", id, e.getMessage(), e.getClass());
+            log.error(LoggerMessagePattern.ERROR, "deleteUser", id, e.getMessage(), e.getClass());
             throw e;
         }
     }

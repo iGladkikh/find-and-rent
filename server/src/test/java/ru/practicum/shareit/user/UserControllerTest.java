@@ -17,10 +17,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,7 +60,10 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", is(notNullValue())))
                 .andExpect(jsonPath("$[0]", is(notNullValue())))
-                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class));
+                .andExpect(jsonPath("$[0].id", is(userDto.getId()), Long.class))
+        ;
+
+        verify(userService, times(1)).findAll();
     }
 
     @Test
@@ -70,7 +71,7 @@ class UserControllerTest {
         when(userService.findById(anyLong()))
                 .thenReturn(user);
 
-        mvc.perform(get(URI_PATH + "/" + anyLong())
+        mvc.perform(get(URI_PATH + "/" + userDto.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -78,6 +79,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userService, times(1)).findById(1);
     }
 
     @Test
@@ -94,6 +97,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userService, times(1)).create(user);
     }
 
     @Test
@@ -101,7 +106,7 @@ class UserControllerTest {
         when(userService.update(any(User.class)))
                 .thenReturn(user);
 
-        mvc.perform(patch(URI_PATH + "/" + anyLong())
+        mvc.perform(patch(URI_PATH + "/" + userDto.getId())
                         .content(mapper.writeValueAsString(userDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,14 +115,18 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userService, times(1)).update(user);
     }
 
     @Test
     void delete() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete(URI_PATH + "/" + anyLong())
+        mvc.perform(MockMvcRequestBuilders.delete(URI_PATH + "/" + userDto.getId())
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(userService, times(1)).delete(1);
     }
 }

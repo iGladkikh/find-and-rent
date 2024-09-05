@@ -17,13 +17,14 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -89,6 +90,8 @@ class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(booking.getId()), Long.class));
+
+        verify(bookingService, times(1)).findByBookerIdAndState(1, BookingStateFilter.ALL);
     }
 
     @Test
@@ -103,6 +106,8 @@ class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(booking.getId()), Long.class));
+
+        verify(bookingService, times(1)).findByOwnerIdAndState(1, BookingStateFilter.ALL);
     }
 
     @Test
@@ -118,6 +123,8 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(booking.getId()), Long.class))
                 .andExpect(jsonPath("$.booker.id", is(user.getId()), Long.class));
+
+        verify(bookingService, times(1)).findByIdAndUserId(1, 1);
     }
 
     @Test
@@ -142,5 +149,8 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.item.id", is(bookingDto.getItemId()), Long.class))
                 .andExpect(jsonPath("$.item.name", is(item.getName())));
 
+        verify(bookingService, times(1)).create(1, 1,
+                booking.getStart().truncatedTo(ChronoUnit.SECONDS),
+                booking.getEnd().truncatedTo(ChronoUnit.SECONDS));
     }
 }
